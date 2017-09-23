@@ -4,24 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/light_gray"
     android:orientation="vertical"
-    tools:context="android.androidchallenge.ui.MainActivity"
-    android:background="@color/light_gray">
+    tools:context="android.androidchallenge.ui.MainActivity">
 
+    <Button
+        android:id="@+id/history_btn"
+        android:textAllCaps="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="@dimen/middle_margin"
+        android:text="@string/history"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/middle_text_size"
+        android:onClick="onHistoryBtnClickActionPerformed"/>
 
     <EditText
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:drawable/edit_text"
         android:layout_marginTop="10dp"
+        android:background="@android:drawable/edit_text"
         android:hint="Search..."
         android:maxLines="1"
-        android:singleLine="true"/>
+        android:singleLine="true" />
 
     <GridView
         android:id="@+id/images_grid_view"
         android:layout_width="match_parent"
-        android:numColumns="3"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:numColumns="3" />
 </LinearLayout>

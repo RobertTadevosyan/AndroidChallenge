@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AndroidChallenge</string>
+    <string name="history">History</string>
 </resources>

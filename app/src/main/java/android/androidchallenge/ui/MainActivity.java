@@ -5,14 +5,22 @@ import android.androidchallenge.adapters.CustomAdapter;
 import android.androidchallenge.base.BaseActivity;
 import android.androidchallenge.core.models.Response;
 import android.androidchallenge.core.models.ResponseDataResult;
+import android.androidchallenge.core.realM.History;
 import android.androidchallenge.core.retrofit.RequestManager;
 import android.androidchallenge.core.retrofit.ResponseCallback;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +35,8 @@ public class MainActivity extends BaseActivity {
     private List<Response> data;
     Boolean loadingMore = true;
     private String previosSearchText;
+    private Button historyBtn;
+    private List<String> histories;
 
 
     @Override
@@ -44,17 +54,34 @@ public class MainActivity extends BaseActivity {
     }
 
     private void configureViews() {
+        historyBtn = (Button) findViewById(R.id.history_btn);
+        histories = new ArrayList<>();
+        checkingHistories();
         searchBar = (EditText) findViewById(R.id.search_bar);
         gridView = (GridView) findViewById(R.id.images_grid_view);
         searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
                     searchByQueryActionPerformed(searchBar.getText().toString());
+                    History.addHistoryToDB(searchBar.getText().toString());
                 }
                 return false;
             }
         });
         gridViewConfigs();
+    }
+
+    private void checkingHistories() {
+        if (History.getAllHistory().isEmpty()) {
+            historyBtn.setVisibility(View.GONE);
+        } else {
+            histories.clear();
+            List<History> list = History.getAllHistory();
+            for (History history : list) {
+                histories.add(history.getText());
+            }
+            historyBtn.setVisibility(View.VISIBLE);
+        }
     }
 
     private void gridViewConfigs() {
@@ -71,9 +98,9 @@ public class MainActivity extends BaseActivity {
                                  int visibleItemCount, int totalItemCount) {
                 int lastInScreen = firstVisibleItem + visibleItemCount;
                 if (lastInScreen == totalItemCount && loadingMore) {
-                    if(searchBar.getText().toString().isEmpty() && previosSearchText != null){
+                    if (searchBar.getText().toString().isEmpty() && previosSearchText != null) {
                         searchByQueryActionPerformed(previosSearchText);
-                    }else {
+                    } else {
                         searchByQueryActionPerformed(searchBar.getText().toString());
                     }
                 }
@@ -92,8 +119,8 @@ public class MainActivity extends BaseActivity {
             public void success(Object object) {
                 getRequestLoadingMotion().hide();
                 ResponseDataResult responseDataResult = (ResponseDataResult) object;
-                if (responseDataResult.getPhotos() != null &&  !responseDataResult.getPhotos().getPhoto().isEmpty()) {
-                    if (previosSearchText != null && previosSearchText.equals(text)){
+                if (responseDataResult.getPhotos() != null && !responseDataResult.getPhotos().getPhoto().isEmpty()) {
+                    if (previosSearchText != null && previosSearchText.equals(text)) {
                         loadingMore = true;
                         updateGridView(responseDataResult.getPhotos().getPhoto(), false);
                     } else {
@@ -102,13 +129,13 @@ public class MainActivity extends BaseActivity {
                         updateGridView(responseDataResult.getPhotos().getPhoto(), true);
                     }
                 }
-                if(previosSearchText != null && !previosSearchText.equals(text)){
+                if (previosSearchText != null && !previosSearchText.equals(text)) {
                     loadingMore = true;
                 }
-                if (!text.isEmpty()){
+                if (!text.isEmpty()) {
                     previosSearchText = text;
                 }
-
+                checkingHistories();
             }
 
             @Override
@@ -130,5 +157,30 @@ public class MainActivity extends BaseActivity {
         }
         data.addAll(photos);
         adapter.notifyDataSetChanged();
+    }
+
+    public void onHistoryBtnClickActionPerformed(View view) {
+        showHistoryAlert();
+    }
+
+    private void showHistoryAlert() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setCancelable(true);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.alert_dialog_layout, null);
+        dialogBuilder.setView(dialogView);
+        ListView historyListView = dialogView.findViewById(R.id.historyListView);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, histories);
+        historyListView.setAdapter(adapter);
+        final AlertDialog alertDialog = dialogBuilder.create();
+        historyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                searchBar.setText(histories.get(i));
+                searchByQueryActionPerformed(histories.get(i));
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
     }
 }
