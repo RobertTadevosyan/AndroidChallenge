@@ -21,7 +21,7 @@ public class MyApplication extends Application {
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .deleteRealmIfMigrationNeeded()
-                .name("LAV_CLIENT.realm")
+                .name("ANDROID_CHALLENGE.realm")
                 .schemaVersion(1)
                 .build();
         Realm.getInstance(config);

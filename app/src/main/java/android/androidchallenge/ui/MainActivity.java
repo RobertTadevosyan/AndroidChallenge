@@ -177,6 +177,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 searchBar.setText(histories.get(i));
+                searchBar.setSelection(searchBar.getText().toString().length());
                 searchByQueryActionPerformed(histories.get(i));
                 alertDialog.dismiss();
             }
